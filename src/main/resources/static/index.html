@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Resume Optimizer - Test Page</title>
+</head>
+<body>
+
+    <h1>Test Greeting</h1>
+
+    <input type="text" id="nameInput" placeholder="Enter your name">
+    <button onclick="sayHello()">Say Hello</button>
+
+    <p id="result"></p>
+
+    <script>
+        function sayHello() {
+            const name = document.getElementById("nameInput").value;
+
+            fetch("http://localhost:8080/greet", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ name: name })
+            })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById("result").innerText = data;
+            })
+            .catch(error => {
+                document.getElementById("result").innerText = "Error: " + error;
+            });
+        }
+    </script>
+
+</body>
+</html>
