@@ -1,11 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Resume Optimizer - Test Page</title>
 </head>
-<body>
 
+<body>
+    <h1>Resume Upload Test</h1>
+
+    <input type="file" id="resumeFile" accept=".pdf">
+    <button onclick="uploadResume()">Upload Resume</button>
+
+    <p id="uploadResult"></p>
+
+    <script>
+        function uploadResume() {
+            const fileInput = document.getElementById("resumeFile");
+            const file = fileInput.files[0];
+
+            if (!file) {
+                document.getElementById("uploadResult").innerText = "Please select a file first.";
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("file", file);
+
+            fetch("http://localhost:8080/api/resume/upload", {
+                method: "POST",
+                body: formData
+            })
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById("uploadResult").innerText = data;
+                })
+                .catch(error => {
+                    document.getElementById("uploadResult").innerText = "Error: " + error;
+                });
+        }
+    </script>
     <h1>Test Greeting</h1>
 
     <input type="text" id="nameInput" placeholder="Enter your name">
@@ -24,15 +58,16 @@
                 },
                 body: JSON.stringify({ name: name })
             })
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById("result").innerText = data;
-            })
-            .catch(error => {
-                document.getElementById("result").innerText = "Error: " + error;
-            });
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById("result").innerText = data;
+                })
+                .catch(error => {
+                    document.getElementById("result").innerText = "Error: " + error;
+                });
         }
     </script>
 
 </body>
+
 </html>
