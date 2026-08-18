@@ -30,4 +30,12 @@ public class HomeController {
         return "Hello " + request.getName() + "! Nice to meet you.";
     }
 
+    @Autowired
+    private com.vamshi.resume_optimizer.service.GeminiService geminiService;
+
+    @PostMapping("/api/test-ai")
+    public String testAI(@RequestBody GreetRequest request) {
+        return geminiService.askGemini("Say hello to " + request.getName() + " in a creative way.");
+    }
+
 }
