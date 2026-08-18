@@ -5,6 +5,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
+
+import java.io.IOException;
+
 @RestController
 public class ResumeController {
 
@@ -15,13 +21,17 @@ public class ResumeController {
             return "No file uploaded!";
         }
 
-        String fileName = file.getOriginalFilename();
-        long fileSize = file.getSize();
-        String fileType = file.getContentType();
+        try {
+            PDDocument document = Loader.loadPDF(file.getBytes());
+            PDFTextStripper stripper = new PDFTextStripper();
+            String extractedText = stripper.getText(document);
+            document.close();
 
-        return "Received file: " + fileName +
-               " | Size: " + fileSize + " bytes" +
-               " | Type: " + fileType;
+            return "Extracted text:\n\n" + extractedText;
+
+        } catch (IOException e) {
+            return "Error reading PDF: " + e.getMessage();
+        }
     }
 
 }
