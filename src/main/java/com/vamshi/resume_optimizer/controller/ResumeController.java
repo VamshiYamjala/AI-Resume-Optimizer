@@ -16,6 +16,9 @@ import com.vamshi.resume_optimizer.service.PromptBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vamshi.resume_optimizer.dto.AnalysisResult;
 
+import com.vamshi.resume_optimizer.model.ResumeAnalysis;
+import com.vamshi.resume_optimizer.repository.ResumeAnalysisRepository;
+
 import java.io.IOException;
 
 @RestController
@@ -23,6 +26,9 @@ public class ResumeController {
 
     @Autowired
     private GeminiService geminiService;
+
+    @Autowired
+    private ResumeAnalysisRepository resumeAnalysisRepository;
 
     @PostMapping("/api/resume/upload")
     public String uploadResume(@RequestParam("file") MultipartFile file) {
@@ -63,6 +69,16 @@ public class ResumeController {
 
         ObjectMapper objectMapper = new ObjectMapper();
         AnalysisResult result = objectMapper.readValue(aiResponseJson, AnalysisResult.class);
+
+        ResumeAnalysis analysis = new ResumeAnalysis();
+        analysis.setResumeText(resumeText);
+        analysis.setJobDescription(jobDescription);
+        analysis.setAtsScore(result.getAtsScore());
+        analysis.setMatchingSkills(result.getMatchingSkills());
+        analysis.setMissingSkills(result.getMissingSkills());
+        analysis.setSuggestions(result.getSuggestions());
+
+        resumeAnalysisRepository.save(analysis);
 
         return result;
     }
