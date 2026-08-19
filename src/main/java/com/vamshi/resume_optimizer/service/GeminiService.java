@@ -22,12 +22,11 @@ public class GeminiService {
     public String askGemini(String prompt) {
 
         Map<String, Object> requestBody = Map.of(
-            "contents", new Object[] {
-                Map.of("parts", new Object[] {
-                    Map.of("text", prompt)
-                })
-            }
-        );
+                "contents", new Object[] {
+                        Map.of("parts", new Object[] {
+                                Map.of("text", prompt)
+                        })
+                });
 
         Map<String, Object> response = restClient.post()
                 .uri(apiUrl + "?key=" + apiKey)
@@ -41,7 +40,14 @@ public class GeminiService {
         List<Map<String, Object>> parts = (List<Map<String, Object>>) content.get("parts");
         String text = (String) parts.get(0).get("text");
 
-        return text;
+        return cleanJsonResponse(text);
+    }
+
+    private String cleanJsonResponse(String rawText) {
+        return rawText
+                .replaceAll("```json", "")
+                .replaceAll("```", "")
+                .trim();
     }
 
 }

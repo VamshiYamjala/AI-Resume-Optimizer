@@ -13,6 +13,9 @@ import org.apache.pdfbox.text.PDFTextStripper;
 import com.vamshi.resume_optimizer.service.GeminiService;
 import com.vamshi.resume_optimizer.service.PromptBuilder;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vamshi.resume_optimizer.dto.AnalysisResult;
+
 import java.io.IOException;
 
 @RestController
@@ -42,29 +45,26 @@ public class ResumeController {
     }
 
     @PostMapping("/api/analyze")
-    public String analyzeResume(
+    public AnalysisResult analyzeResume(
             @RequestParam("file") MultipartFile file,
-            @RequestParam("jobDescription") String jobDescription) {
+            @RequestParam("jobDescription") String jobDescription) throws IOException {
 
         if (file.isEmpty()) {
-            return "No file uploaded!";
+            throw new IOException("No file uploaded!");
         }
 
-        try {
-            PDDocument document = Loader.loadPDF(file.getBytes());
-            PDFTextStripper stripper = new PDFTextStripper();
-            String resumeText = stripper.getText(document);
-            document.close();
+        PDDocument document = Loader.loadPDF(file.getBytes());
+        PDFTextStripper stripper = new PDFTextStripper();
+        String resumeText = stripper.getText(document);
+        document.close();
 
-            String prompt = PromptBuilder.buildAnalysisPrompt(resumeText, jobDescription);
+        String prompt = PromptBuilder.buildAnalysisPrompt(resumeText, jobDescription);
+        String aiResponseJson = geminiService.askGemini(prompt);
 
-            String aiResponse = geminiService.askGemini(prompt);
+        ObjectMapper objectMapper = new ObjectMapper();
+        AnalysisResult result = objectMapper.readValue(aiResponseJson, AnalysisResult.class);
 
-            return aiResponse;
-
-        } catch (IOException e) {
-            return "Error reading PDF: " + e.getMessage();
-        }
+        return result;
     }
 
 }
