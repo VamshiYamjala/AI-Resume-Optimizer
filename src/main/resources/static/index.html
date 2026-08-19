@@ -1,73 +1,40 @@
-<!DOCTYPE html>
-<html lang="en">
+<h1>Resume Analysis</h1>
 
-<head>
-    <meta charset="UTF-8">
-    <title>Resume Optimizer - Test Page</title>
-</head>
+<input type="file" id="analyzeFile" accept=".pdf">
+<br><br>
+<textarea id="jobDescription" rows="6" cols="50" placeholder="Paste job description here..."></textarea>
+<br><br>
+<button onclick="analyzeResume()">Analyze Resume</button>
 
-<body>
-    <h1>Resume Upload Test</h1>
+<pre id="analyzeResult"></pre>
 
-    <input type="file" id="resumeFile" accept=".pdf">
-    <button onclick="uploadResume()">Upload Resume</button>
+<script>
+    function analyzeResume() {
+        const fileInput = document.getElementById("analyzeFile");
+        const file = fileInput.files[0];
+        const jobDescription = document.getElementById("jobDescription").value;
 
-    <p id="uploadResult"></p>
-
-    <script>
-        function uploadResume() {
-            const fileInput = document.getElementById("resumeFile");
-            const file = fileInput.files[0];
-
-            if (!file) {
-                document.getElementById("uploadResult").innerText = "Please select a file first.";
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append("file", file);
-
-            fetch("http://localhost:8080/api/resume/upload", {
-                method: "POST",
-                body: formData
-            })
-                .then(response => response.text())
-                .then(data => {
-                    document.getElementById("uploadResult").innerText = data;
-                })
-                .catch(error => {
-                    document.getElementById("uploadResult").innerText = "Error: " + error;
-                });
+        if (!file || !jobDescription) {
+            document.getElementById("analyzeResult").innerText = "Please select a file and enter a job description.";
+            return;
         }
-    </script>
-    <h1>Test Greeting</h1>
 
-    <input type="text" id="nameInput" placeholder="Enter your name">
-    <button onclick="sayHello()">Say Hello</button>
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("jobDescription", jobDescription);
 
-    <p id="result"></p>
+        document.getElementById("analyzeResult").innerText = "Analyzing... please wait.";
 
-    <script>
-        function sayHello() {
-            const name = document.getElementById("nameInput").value;
-
-            fetch("http://localhost:8080/greet", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ name: name })
-            })
-                .then(response => response.text())
-                .then(data => {
-                    document.getElementById("result").innerText = data;
-                })
-                .catch(error => {
-                    document.getElementById("result").innerText = "Error: " + error;
-                });
-        }
-    </script>
-
-</body>
-
-</html>
+        fetch("http://localhost:8080/api/analyze", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById("analyzeResult").innerText = data;
+        })
+        .catch(error => {
+            document.getElementById("analyzeResult").innerText = "Error: " + error;
+        });
+    }
+</script>

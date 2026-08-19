@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -17,6 +18,7 @@ public class GeminiService {
 
     private final RestClient restClient = RestClient.create();
 
+    @SuppressWarnings("unchecked")
     public String askGemini(String prompt) {
 
         Map<String, Object> requestBody = Map.of(
@@ -27,14 +29,19 @@ public class GeminiService {
             }
         );
 
-        Map response = restClient.post()
+        Map<String, Object> response = restClient.post()
                 .uri(apiUrl + "?key=" + apiKey)
                 .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
                 .body(requestBody)
                 .retrieve()
                 .body(Map.class);
 
-        return response.toString();
+        List<Map<String, Object>> candidates = (List<Map<String, Object>>) response.get("candidates");
+        Map<String, Object> content = (Map<String, Object>) candidates.get(0).get("content");
+        List<Map<String, Object>> parts = (List<Map<String, Object>>) content.get("parts");
+        String text = (String) parts.get(0).get("text");
+
+        return text;
     }
 
 }
